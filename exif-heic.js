@@ -1,7 +1,33 @@
 function getTags(data)
 {
     var dataView = new DataView(data);
-    var exifOffset = dataView.getInt32(3971);   // 0x18 + 0xF74 - 0x8
+
+	//***********
+    // Different method for determining exifOffset
+    // might not be very professional, but works fine with 
+    // all kinds of different tested iOS .heic files
+    // couldn´t get the original working with its fixed exifOffset
+    
+    //***********
+    
+    var exifOffset = 0;
+	var i;
+	var dLength = dataView.byteLength;
+
+	var FirstOcc = false;
+
+	for (i = 0; i < dLength; i++) { 
+	  if ((getStringFromDB(dataView, i, 4) == "Exif") && (FirstOcc == true)) {
+		exifOffset = i - 4;
+		break;
+	  }
+	  if (getStringFromDB(dataView, i, 4) == "Exif") {
+		 FirstOcc = true;
+	  }
+	}
+    // End of Changes
+    //***********    
+    
     var tags = readEXIFData(dataView, exifOffset + 4);
 
     return tags;
